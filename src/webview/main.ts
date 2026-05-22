@@ -62,12 +62,9 @@ const statusEls = { statusVersionEl, modelBtnHeader, modelMenu, statusSessionEl,
 const closeFn = () => closeAllDropdowns(dropdownEls);
 
 function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  const el = document.createElement('div');
+  el.textContent = value;
+  return el.innerHTML;
 }
 
 // ── Helpers ──────────────────────────────────────────
