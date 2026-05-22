@@ -71,10 +71,12 @@ export class ChatPanelProvider implements vscode.WebviewViewProvider {
 
     // Emit initial state
     setTimeout(() => {
-      const statusBarMsg: any = { type: 'statusBar', model: this.initialModel, skillGroups: this.skillGroups };
-      if (this.hermesVersion) {
-        statusBarMsg.version = this.hermesVersion;
-      }
+      const statusBarMsg: ToWebview = {
+        type: 'statusBar',
+        model: this.initialModel,
+        skillGroups: this.skillGroups,
+        ...(this.hermesVersion ? { version: this.hermesVersion } : {}),
+      };
       this.post(statusBarMsg);
       this.broadcastSessions(this.store);
       // Restore last session's history into the view
