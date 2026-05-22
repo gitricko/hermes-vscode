@@ -61,6 +61,15 @@ const dropdownEls = { modelMenu, sessionPicker, skillsMenu, overflowMenu, cmdArg
 const statusEls = { statusVersionEl, modelBtnHeader, modelMenu, statusSessionEl, statusContextEl, ctxBarWrap, ctxBar, ctxBarFresh };
 const closeFn = () => closeAllDropdowns(dropdownEls);
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // ── Helpers ──────────────────────────────────────────
 function setBusy(active: boolean, queued = 0): void {
   S.isBusy = active;
@@ -405,7 +414,7 @@ window.addEventListener('message', (e: MessageEvent) => {
       if (msg.toolCallId) toolEl.dataset.toolId = msg.toolCallId;
       const { label, info } = formatToolDisplay(msg.toolName ?? '', msg.toolKind, msg.toolLocations, msg.toolDetail);
       const infoHtml = info ? `<span class="tool-detail">${DOMPurify.sanitize(info)}</span>` : '';
-      toolEl.innerHTML = `<span class="tool-status${statusClass}">${statusIcon}</span><span class="tool-name">${label}</span>${infoHtml}`;
+      toolEl.innerHTML = `<span class="tool-status${statusClass}">${statusIcon}</span><span class="tool-name">${escapeHtml(label)}</span>${infoHtml}`;
       autoScroll();
       break;
     }
@@ -508,7 +517,7 @@ window.addEventListener('message', (e: MessageEvent) => {
       if (msg.attachedFiles !== undefined) {
         if (msg.attachedFiles && msg.attachedFiles.length > 0) {
           attachChip.innerHTML = msg.attachedFiles.map((f: {name: string}) =>
-            `⊕ <span class="chip-name">${f.name}</span>`
+            `⊕ <span class="chip-name">${escapeHtml(f.name)}</span>`
           ).join(' ') + ' <span class="chip-x">✕</span>';
           attachChip.style.display = 'flex';
         } else {

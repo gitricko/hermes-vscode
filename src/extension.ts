@@ -56,20 +56,6 @@ function readHermesModel(): { model: string; source: 'env' | 'config' | 'fallbac
   return { model: DEFAULT_SONNET_MODEL, source: 'fallback' };
 }
 
-function readHermesVersion(hermesPath: string): string {
-  try {
-    const output = execFileSync(hermesPath, ['--version'], {
-      timeout: 5000,
-      encoding: 'utf8',
-      env: { ...process.env, PATH: `${path.dirname(hermesPath)}:${process.env.PATH ?? ''}` },
-    });
-    const match = output.match(/v(\d+\.\d+\.\d+)/);
-    return match?.[1] ? `v${match[1]}` : '';
-  } catch {
-    return '';
-  }
-}
-
 function readConfiguredHermesPath(): { value: string; workspaceOverrideIgnored: boolean } {
   const hermesConfig = vscode.workspace.getConfiguration('hermes');
   const inspected = hermesConfig.inspect<string>('path');
@@ -261,12 +247,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
   const session = new SessionManager(client, line => outputChannel.appendLine(line), permissionHandler);
   const { model: hermesModel } = readHermesModel();
-  const hermesVersion = readHermesVersion(hermesPath);
   const panel = new ChatPanelProvider(
     context.extensionUri,
     session,
     hermesModel,
-    hermesVersion,
+    '',
     context,
     line => outputChannel.appendLine(line),
   );

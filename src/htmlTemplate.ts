@@ -7,6 +7,7 @@
  */
 
 import * as vscode from 'vscode';
+import { randomBytes } from 'crypto';
 import type { ModelMenuGroup } from './modelCatalog';
 
 export interface TemplateConfig {
@@ -63,10 +64,7 @@ export function buildChatHtml(config: TemplateConfig): string {
     vscode.Uri.joinPath(extensionUri, 'resources', 'hermes-logo.png'),
   );
 
-  const nonce = Array.from(
-    { length: 32 },
-    () => Math.random().toString(36)[2],
-  ).join('');
+  const nonce = randomBytes(32).toString('hex');
 
   const modelLabel = initialModelLabel(config);
   const modelMenuHtml = buildModelMenuItems(config);
