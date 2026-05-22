@@ -4,12 +4,8 @@
 
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
-import escapeHtmlLib from 'escape-html';
 import type { StoredMessage, TodoItem } from '../types';
-
-function escapeHtml(value: string): string {
-  return escapeHtmlLib(value);
-}
+import { escapeHtml } from './escapeHtml';
 
 // ── Markdown ─────────────────────────────────────────
 

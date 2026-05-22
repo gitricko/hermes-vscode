@@ -5,17 +5,9 @@
 import type { FromWebview } from '../types';
 import type { WebviewState } from './state';
 import { fmtAge, fmtTok } from './renderers';
+import { escapeHtml } from './escapeHtml';
 
 type Vscode = { postMessage(msg: FromWebview): void };
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
 
 // ── Dropdown management ──────────────────────────────
 

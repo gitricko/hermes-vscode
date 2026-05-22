@@ -16,6 +16,7 @@ import {
   closeAllDropdowns, buildSessionPicker, setupSessionPickerHandlers,
   buildSkillsMenu, setupSkillsHandlers, updateStatusBar,
 } from './menus';
+import { escapeHtml } from './escapeHtml';
 
 declare function acquireVsCodeApi(): { postMessage(msg: FromWebview): void };
 const vscode = acquireVsCodeApi();
@@ -60,12 +61,6 @@ const cmdArgLabel      = document.getElementById('cmd-arg-label') as HTMLElement
 const dropdownEls = { modelMenu, sessionPicker, skillsMenu, overflowMenu, cmdArgPopover };
 const statusEls = { statusVersionEl, modelBtnHeader, modelMenu, statusSessionEl, statusContextEl, ctxBarWrap, ctxBar, ctxBarFresh };
 const closeFn = () => closeAllDropdowns(dropdownEls);
-
-function escapeHtml(value: string): string {
-  const el = document.createElement('div');
-  el.textContent = value;
-  return el.innerHTML;
-}
 
 // ── Helpers ──────────────────────────────────────────
 function setBusy(active: boolean, queued = 0): void {
