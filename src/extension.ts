@@ -192,6 +192,8 @@ function optionIdByIntent(params: unknown, intent: 'allow' | 'deny'): string | n
 
 let client: AcpClient | null = null;
 let outputChannel: vscode.OutputChannel;
+let cachedHermesVersion = '';
+let lastHermesPathForVersion = '';
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   outputChannel = vscode.window.createOutputChannel('Hermes');
@@ -333,9 +335,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       setStatus('disconnected');
       return;
     }
-    const hermesVersion = readHermesVersion(hermesPath);
-    if (hermesVersion) {
-      panel.updateVersion(hermesVersion);
+    // Only read version if client is not already running or if hermesPath changed
+    // to avoid repeated blocking calls on every ensureConnected() invocation
+    if (!client.running || lastHermesPathForVersion !== hermesPath) {
+      const hermesVersion = readHermesVersion(hermesPath);
+      if (hermesVersion) {
+        cachedHermesVersion = hermesVersion;
+        lastHermesPathForVersion = hermesPath;
+      }
+    }
+    if (cachedHermesVersion) {
+      panel.updateVersion(cachedHermesVersion);
     }
     client.setHermesPath(hermesPath);
 
