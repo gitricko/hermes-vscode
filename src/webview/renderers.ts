@@ -4,15 +4,11 @@
 
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import escapeHtmlLib from 'escape-html';
 import type { StoredMessage, TodoItem } from '../types';
 
 function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  return escapeHtmlLib(value);
 }
 
 // ── Markdown ─────────────────────────────────────────
