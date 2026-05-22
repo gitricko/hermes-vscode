@@ -339,9 +339,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     // to avoid repeated blocking calls on every ensureConnected() invocation
     if (!client.running || lastHermesPathForVersion !== hermesPath) {
       const hermesVersion = readHermesVersion(hermesPath);
+      lastHermesPathForVersion = hermesPath;
       if (hermesVersion) {
         cachedHermesVersion = hermesVersion;
-        lastHermesPathForVersion = hermesPath;
       }
     }
     if (cachedHermesVersion) {
