@@ -56,6 +56,19 @@ function readHermesModel(): { model: string; source: 'env' | 'config' | 'fallbac
   return { model: DEFAULT_SONNET_MODEL, source: 'fallback' };
 }
 
+function readHermesVersion(hermesPath: string): string {
+  const attempts: string[][] = [['--version'], ['version']];
+  for (const args of attempts) {
+    try {
+      const output = execFileSync(hermesPath, args, { timeout: 3000, encoding: 'utf8' }).trim();
+      if (output) return output.split(/\r?\n/, 1)[0].trim();
+    } catch {
+      // try next option
+    }
+  }
+  return '';
+}
+
 function readConfiguredHermesPath(): { value: string; workspaceOverrideIgnored: boolean } {
   const hermesConfig = vscode.workspace.getConfiguration('hermes');
   const inspected = hermesConfig.inspect<string>('path');
@@ -319,6 +332,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       outputChannel.appendLine('[security] Hermes launch cancelled by user');
       setStatus('disconnected');
       return;
+    }
+    const hermesVersion = readHermesVersion(hermesPath);
+    if (hermesVersion) {
+      panel.updateVersion(hermesVersion);
     }
     client.setHermesPath(hermesPath);
 

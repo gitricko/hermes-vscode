@@ -36,7 +36,7 @@ export class ChatPanelProvider implements vscode.WebviewViewProvider {
     private readonly extensionUri: vscode.Uri,
     private readonly session: SessionManager,
     private readonly initialModel: string = '—',
-    private readonly hermesVersion: string = '',
+    private hermesVersion: string = '',
     private readonly context: vscode.ExtensionContext,
     private readonly log: (line: string) => void = () => {},
   ) {
@@ -168,6 +168,12 @@ export class ChatPanelProvider implements vscode.WebviewViewProvider {
 
   post(msg: ToWebview): void {
     this.view?.webview.postMessage(msg);
+  }
+
+  updateVersion(version: string): void {
+    if (!version || version === this.hermesVersion) return;
+    this.hermesVersion = version;
+    this.post({ type: 'statusBar', version: this.hermesVersion });
   }
 
   private saveTurnToSession(): void {
