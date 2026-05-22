@@ -342,10 +342,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       lastHermesPathForVersion = hermesPath;
       if (hermesVersion) {
         cachedHermesVersion = hermesVersion;
+      } else {
+        cachedHermesVersion = '';
       }
     }
     if (cachedHermesVersion) {
       panel.updateVersion(cachedHermesVersion);
+    } else {
+      panel.updateVersion('');
     }
     client.setHermesPath(hermesPath);
 
