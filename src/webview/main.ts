@@ -413,7 +413,7 @@ window.addEventListener('message', (e: MessageEvent) => {
       const toolEl = appendDiv(messagesEl, 'msg tool');
       if (msg.toolCallId) toolEl.dataset.toolId = msg.toolCallId;
       const { label, info } = formatToolDisplay(msg.toolName ?? '', msg.toolKind, msg.toolLocations, msg.toolDetail);
-      const infoHtml = info ? `<span class="tool-detail">${DOMPurify.sanitize(info)}</span>` : '';
+      const infoHtml = info ? `<span class="tool-detail">${escapeHtml(info)}</span>` : '';
       toolEl.innerHTML = `<span class="tool-status${statusClass}">${statusIcon}</span><span class="tool-name">${escapeHtml(label)}</span>${infoHtml}`;
       autoScroll();
       break;
