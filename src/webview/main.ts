@@ -382,7 +382,7 @@ window.addEventListener('message', (e: MessageEvent) => {
 
     case 'toolCall': {
       if (!msg.toolName && msg.toolCallId) {
-        const existing = document.querySelector(`[data-tool-id="${msg.toolCallId}"]`);
+        const existing = document.querySelector(`[data-tool-id="${CSS.escape(msg.toolCallId)}"]`);
         if (existing) {
           const isDone = msg.toolStatus === 'done' || msg.toolStatus === 'completed';
           const isError = msg.toolStatus === 'error';
