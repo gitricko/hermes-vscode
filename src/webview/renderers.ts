@@ -138,7 +138,7 @@ export function loadHistory(
       const isPending = m.text.startsWith('⋯');
       const icon = isError ? '✗' : isPending ? '⋯' : '✓';
       const cls = isError ? ' error' : isPending ? '' : ' done';
-      const cleaned = DOMPurify.sanitize(m.text.replace(/^[✓✗⋯]\s*/, ''));
+      const cleaned = m.text.replace(/^[✓✗⋯]\s*/, '');
       const colonIdx = cleaned.indexOf(':');
       const name = colonIdx > 0 ? cleaned.slice(0, colonIdx).trim() : cleaned;
       const detail = colonIdx > 0 ? `<span class="tool-detail">${escapeHtml(cleaned.slice(colonIdx + 1).trim())}</span>` : '';
