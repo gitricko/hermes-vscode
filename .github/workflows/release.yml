@@ -37,16 +37,14 @@ jobs:
         id: version
         run: echo "tag=v$(jq -r '.version' package.json)" >> $GITHUB_OUTPUT
 
-      # Fail if tag already exists
-      - name: Check if tag exists
+      # Fail if version tag already exists
+      - name: Check if version tag exists
         run: |
           tag="${{ steps.version.outputs.tag }}"
-          if gh release view "$tag" > /dev/null 2>&1; then
-            echo "Error: Release tag $tag already exists"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null 2>&1; then
+            echo "Error: Version tag $tag already exists"
             exit 1
           fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Upload VSIX as an artifact (for archival)
       - name: Upload VSIX artifact
