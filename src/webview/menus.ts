@@ -138,8 +138,10 @@ function renderTokenDisplay(
 ): string {
   void fresh; void cached; // unused — we only show total vs window size
 
-  const safeTotal = Number.isFinite(Number(total)) && Number(total) >= 0 ? Number(total) : 0;
-  const safeSize = Number.isFinite(Number(size)) && Number(size) >= 0 ? Number(size) : 0;
+  const totalNum = Number(total);
+  const sizeNum = Number(size);
+  const safeTotal = Number.isFinite(totalNum) && totalNum >= 0 ? totalNum : 0;
+  const safeSize = Number.isFinite(sizeNum) && sizeNum >= 0 ? sizeNum : 0;
 
   const totalText = escapeHtml(fmtTok(safeTotal));
   const sizeText = escapeHtml(fmtTok(safeSize));
