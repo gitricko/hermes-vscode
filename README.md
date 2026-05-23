@@ -104,7 +104,7 @@ Webview (sandboxed)
 
 Communication: JSON-RPC 2.0 over stdio to `hermes acp` subprocess. Webview sandboxed with CSP + DOMPurify. Media isolated to extension storage.
 
-## Credits
+## Credits.
 
 - [Hermes Agent](https://github.com/collinear-ai/hermes-agent) by [Nous Research](https://nousresearch.com/) — the AI agent runtime this extension connects to
 - [Agent Client Protocol (ACP)](https://agentclientprotocol.com/) — the communication protocol between extension and agent
