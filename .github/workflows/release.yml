@@ -29,9 +29,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build extension (webpack)
-        run: npm run build
-
       - name: Package VSIX
         run: npm run package
 
