@@ -103,7 +103,7 @@
     "build": "webpack --mode production",
     "dev": "webpack --mode development --watch",
     "package": "vsce package --no-dependencies",
-    "publish": "vsce publish --no-dependencies --pat $VSCE_TOKEN"
+    "vsce:publish": "vsce publish --no-dependencies"
   },
   "devDependencies": {
     "@types/dompurify": "^3.0.5",
