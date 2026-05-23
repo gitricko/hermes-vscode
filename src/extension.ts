@@ -57,17 +57,16 @@ function readHermesModel(): { model: string; source: 'env' | 'config' | 'fallbac
 }
 
 function readHermesVersion(hermesPath: string): string {
-  try {
-    const output = execFileSync(hermesPath, ['--version'], {
-      timeout: 5000,
-      encoding: 'utf8',
-      env: { ...process.env, PATH: `${path.dirname(hermesPath)}:${process.env.PATH ?? ''}` },
-    });
-    const match = output.match(/v(\d+\.\d+\.\d+)/);
-    return match?.[1] ? `v${match[1]}` : '';
-  } catch {
-    return '';
+  const attempts: string[][] = [['--version'], ['version']];
+  for (const args of attempts) {
+    try {
+      const output = execFileSync(hermesPath, args, { timeout: 3000, encoding: 'utf8' }).trim();
+      if (output) return output.split(/\r?\n/, 1)[0].trim();
+    } catch {
+      // try next option
+    }
   }
+  return '';
 }
 
 function readConfiguredHermesPath(): { value: string; workspaceOverrideIgnored: boolean } {
@@ -193,6 +192,8 @@ function optionIdByIntent(params: unknown, intent: 'allow' | 'deny'): string | n
 
 let client: AcpClient | null = null;
 let outputChannel: vscode.OutputChannel;
+let cachedHermesVersion = '';
+let lastHermesPathForVersion = '';
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   outputChannel = vscode.window.createOutputChannel('Hermes');
@@ -261,12 +262,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
   const session = new SessionManager(client, line => outputChannel.appendLine(line), permissionHandler);
   const { model: hermesModel } = readHermesModel();
-  const hermesVersion = readHermesVersion(hermesPath);
   const panel = new ChatPanelProvider(
     context.extensionUri,
     session,
     hermesModel,
-    hermesVersion,
+    '',
     context,
     line => outputChannel.appendLine(line),
   );
@@ -335,6 +335,22 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       setStatus('disconnected');
       return;
     }
+    // Only read version if client is not already running or if hermesPath changed
+    // to avoid repeated blocking calls on every ensureConnected() invocation
+    if (!client.running || lastHermesPathForVersion !== hermesPath) {
+      const hermesVersion = readHermesVersion(hermesPath);
+      lastHermesPathForVersion = hermesPath;
+      if (hermesVersion) {
+        cachedHermesVersion = hermesVersion;
+      } else {
+        cachedHermesVersion = '';
+      }
+    }
+    if (cachedHermesVersion) {
+      panel.updateVersion(cachedHermesVersion);
+    } else {
+      panel.updateVersion('');
+    }
     client.setHermesPath(hermesPath);
 
     outputChannel.appendLine('[acp] connecting');
@@ -349,6 +365,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       vscode.window.showErrorMessage(`Hermes: failed to start — ${err}`);
     }
   }
+
+  context.subscriptions.push(
+    vscode.workspace.onDidGrantWorkspaceTrust(() => {
+      void ensureConnected();
+    }),
+  );
 
   // Auto-connect
   if (vscode.workspace.isTrusted) {

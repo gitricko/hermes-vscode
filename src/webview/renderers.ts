@@ -5,6 +5,7 @@
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import type { StoredMessage, TodoItem } from '../types';
+import { escapeHtml } from './escapeHtml';
 
 // ── Markdown ─────────────────────────────────────────
 
@@ -133,11 +134,11 @@ export function loadHistory(
       const isPending = m.text.startsWith('⋯');
       const icon = isError ? '✗' : isPending ? '⋯' : '✓';
       const cls = isError ? ' error' : isPending ? '' : ' done';
-      const cleaned = DOMPurify.sanitize(m.text.replace(/^[✓✗⋯]\s*/, ''));
+      const cleaned = m.text.replace(/^[✓✗⋯]\s*/, '');
       const colonIdx = cleaned.indexOf(':');
       const name = colonIdx > 0 ? cleaned.slice(0, colonIdx).trim() : cleaned;
-      const detail = colonIdx > 0 ? `<span class="tool-detail">${cleaned.slice(colonIdx + 1).trim()}</span>` : '';
-      toolEl.innerHTML = `<span class="tool-status${cls}">${icon}</span><span class="tool-name">${name}</span>${detail}`;
+      const detail = colonIdx > 0 ? `<span class="tool-detail">${escapeHtml(cleaned.slice(colonIdx + 1).trim())}</span>` : '';
+      toolEl.innerHTML = `<span class="tool-status${cls}">${icon}</span><span class="tool-name">${escapeHtml(name)}</span>${detail}`;
     } else if (m.role === 'error') {
       appendMessage(container, 'error', m.text);
     }

@@ -2,10 +2,10 @@
  * Menu builders and dropdown handlers for the webview.
  */
 
-import DOMPurify from 'dompurify';
 import type { FromWebview } from '../types';
 import type { WebviewState } from './state';
 import { fmtAge, fmtTok } from './renderers';
+import { escapeHtml } from './escapeHtml';
 
 type Vscode = { postMessage(msg: FromWebview): void };
 
@@ -38,11 +38,11 @@ export function buildSessionPicker(
 
   container.innerHTML = sessions.map(s => {
     const isActive = s.id === activeId;
-    return `<div class="menu-item${isActive ? ' active' : ''}" data-session-id="${s.id}">
-      ${isActive ? '✓ ' : ''}<span style="overflow:hidden;text-overflow:ellipsis;flex:1">${DOMPurify.sanitize(s.title)}</span>
+    return `<div class="menu-item${isActive ? ' active' : ''}" data-session-id="${escapeHtml(s.id)}">
+      ${isActive ? '✓ ' : ''}<span style="overflow:hidden;text-overflow:ellipsis;flex:1">${escapeHtml(s.title)}</span>
       <span class="item-meta">${fmtAge(s.createdAt)}</span>
-      <span class="session-action rename-session" data-session-id="${s.id}" title="Rename">✎</span>
-      <span class="session-action delete-session" data-session-id="${s.id}" title="Delete">✕</span>
+      <span class="session-action rename-session" data-session-id="${escapeHtml(s.id)}" title="Rename">✎</span>
+      <span class="session-action delete-session" data-session-id="${escapeHtml(s.id)}" title="Delete">✕</span>
     </div>`;
   }).join('') + `<div class="menu-footer">＋ New session</div>`;
 }
@@ -88,10 +88,10 @@ export function buildSkillsMenu(container: HTMLElement, state: WebviewState): vo
   container.innerHTML = state.skillGroupsData.map(g => {
     const items = g.skills.map(s => {
       const sel = state.selectedSkillNames.has(s.name) ? ' selected' : '';
-      const desc = s.description ? `<span class="skill-desc">${s.description}</span>` : '';
-      return `<div class="skill-option${sel}" data-skill="${s.name}">${s.name} ${desc}</div>`;
+      const desc = s.description ? `<span class="skill-desc">${escapeHtml(s.description)}</span>` : '';
+      return `<div class="skill-option${sel}" data-skill="${escapeHtml(s.name)}">${escapeHtml(s.name)} ${desc}</div>`;
     }).join('');
-    return `<div class="skill-group-label">${g.category}</div>${items}`;
+    return `<div class="skill-group-label">${escapeHtml(g.category)}</div>${items}`;
   }).join('');
 }
 

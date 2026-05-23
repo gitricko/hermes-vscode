@@ -16,6 +16,7 @@ import {
   closeAllDropdowns, buildSessionPicker, setupSessionPickerHandlers,
   buildSkillsMenu, setupSkillsHandlers, updateStatusBar,
 } from './menus';
+import { escapeHtml } from './escapeHtml';
 
 declare function acquireVsCodeApi(): { postMessage(msg: FromWebview): void };
 const vscode = acquireVsCodeApi();
@@ -381,7 +382,7 @@ window.addEventListener('message', (e: MessageEvent) => {
 
     case 'toolCall': {
       if (!msg.toolName && msg.toolCallId) {
-        const existing = document.querySelector(`[data-tool-id="${msg.toolCallId}"]`);
+        const existing = document.querySelector(`[data-tool-id="${CSS.escape(msg.toolCallId)}"]`);
         if (existing) {
           const isDone = msg.toolStatus === 'done' || msg.toolStatus === 'completed';
           const isError = msg.toolStatus === 'error';
@@ -404,8 +405,8 @@ window.addEventListener('message', (e: MessageEvent) => {
       const toolEl = appendDiv(messagesEl, 'msg tool');
       if (msg.toolCallId) toolEl.dataset.toolId = msg.toolCallId;
       const { label, info } = formatToolDisplay(msg.toolName ?? '', msg.toolKind, msg.toolLocations, msg.toolDetail);
-      const infoHtml = info ? `<span class="tool-detail">${DOMPurify.sanitize(info)}</span>` : '';
-      toolEl.innerHTML = `<span class="tool-status${statusClass}">${statusIcon}</span><span class="tool-name">${label}</span>${infoHtml}`;
+      const infoHtml = info ? `<span class="tool-detail">${escapeHtml(info)}</span>` : '';
+      toolEl.innerHTML = `<span class="tool-status${statusClass}">${statusIcon}</span><span class="tool-name">${escapeHtml(label)}</span>${infoHtml}`;
       autoScroll();
       break;
     }
@@ -508,7 +509,7 @@ window.addEventListener('message', (e: MessageEvent) => {
       if (msg.attachedFiles !== undefined) {
         if (msg.attachedFiles && msg.attachedFiles.length > 0) {
           attachChip.innerHTML = msg.attachedFiles.map((f: {name: string}) =>
-            `⊕ <span class="chip-name">${f.name}</span>`
+            `⊕ <span class="chip-name">${escapeHtml(f.name)}</span>`
           ).join(' ') + ' <span class="chip-x">✕</span>';
           attachChip.style.display = 'flex';
         } else {

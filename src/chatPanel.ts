@@ -36,7 +36,7 @@ export class ChatPanelProvider implements vscode.WebviewViewProvider {
     private readonly extensionUri: vscode.Uri,
     private readonly session: SessionManager,
     private readonly initialModel: string = '—',
-    private readonly hermesVersion: string = '',
+    private hermesVersion: string = '',
     private readonly context: vscode.ExtensionContext,
     private readonly log: (line: string) => void = () => {},
   ) {
@@ -71,7 +71,13 @@ export class ChatPanelProvider implements vscode.WebviewViewProvider {
 
     // Emit initial state
     setTimeout(() => {
-      this.post({ type: 'statusBar', model: this.initialModel, version: this.hermesVersion, skillGroups: this.skillGroups });
+      const statusBarMsg: ToWebview = {
+        type: 'statusBar',
+        model: this.initialModel,
+        skillGroups: this.skillGroups,
+        ...(this.hermesVersion ? { version: this.hermesVersion } : {}),
+      };
+      this.post(statusBarMsg);
       this.broadcastSessions(this.store);
       // Restore last session's history into the view
       if (active && active.messages.length > 0) {
@@ -168,6 +174,12 @@ export class ChatPanelProvider implements vscode.WebviewViewProvider {
 
   post(msg: ToWebview): void {
     this.view?.webview.postMessage(msg);
+  }
+
+  updateVersion(version: string): void {
+    if (!version || version === this.hermesVersion) return;
+    this.hermesVersion = version;
+    this.post({ type: 'statusBar', version: this.hermesVersion });
   }
 
   private saveTurnToSession(): void {
