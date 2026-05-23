@@ -24,13 +24,13 @@
     "streaming",
     "remote ssh"
   ],
-  "homepage": "https://github.com/joaompfp/hermes-vscode",
+  "homepage": "https://github.com/gitricko/hermes-vscode",
   "bugs": {
-    "url": "https://github.com/joaompfp/hermes-vscode/issues"
+    "url": "https://github.com/gitricko/hermes-vscode/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/joaompfp/hermes-vscode"
+    "url": "https://github.com/gitricko/hermes-vscode"
   },
   "icon": "resources/hermes-logo-128.png",
   "galleryBanner": {
@@ -51,7 +51,7 @@
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
-  "qna": "https://github.com/joaompfp/hermes-vscode/issues",
+  "qna": "https://github.com/gitricko/hermes-vscode/issues",
   "contributes": {
     "commands": [
       {
