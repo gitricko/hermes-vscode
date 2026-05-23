@@ -45,7 +45,7 @@ Add these secrets in **GitHub Repo Settings → Secrets and variables → Action
 
 | Secret | Required? | Description |
 |--------|-----------|-------------|
-| `GITHUB_TOKEN` | No (auto-provided) | Automatically provided by GitHub Actions. Used for creating releases and publishing packages. No manual setup needed. |
+| `GITHUB_TOKEN` | No (auto-provided) | Automatically provided by GitHub Actions. Used for creating GitHub Releases. No manual setup needed. |
 
 No other secrets are required for the current CI configuration.
 
