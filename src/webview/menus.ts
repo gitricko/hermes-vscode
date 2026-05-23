@@ -137,7 +137,14 @@ function renderTokenDisplay(
   size: number,
 ): string {
   void fresh; void cached; // unused — we only show total vs window size
-  return `<span style="color:var(--gold);font-weight:600">${fmtTok(total)}</span> / ${fmtTok(size)}`;
+
+  const safeTotal = Number.isFinite(Number(total)) && Number(total) >= 0 ? Number(total) : 0;
+  const safeSize = Number.isFinite(Number(size)) && Number(size) >= 0 ? Number(size) : 0;
+
+  const totalText = escapeHtml(fmtTok(safeTotal));
+  const sizeText = escapeHtml(fmtTok(safeSize));
+
+  return `<span style="color:var(--gold);font-weight:600">${totalText}</span> / ${sizeText}`;
 }
 
 // ── Status bar updates ───────────────────────────────
