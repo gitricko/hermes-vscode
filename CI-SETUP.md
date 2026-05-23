@@ -2,7 +2,7 @@
 
 This document describes the GitHub Actions workflows and required secrets.
 
-## Workflows
+## Workflows.
 
 ### 1. PR Build (`.github/workflows/pr-build.yml`)
 
