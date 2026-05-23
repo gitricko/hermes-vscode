@@ -87,15 +87,30 @@ const TODO_ICONS: Record<string, string> = {
 export function renderTodoOverlay(container: HTMLElement, todos: TodoItem[]): void {
   if (!todos.length) { container.style.display = 'none'; return; }
   const completed = todos.filter(t => t.status === 'completed').length;
-  const items = todos.map(t => {
-    const icon = TODO_ICONS[t.status] ?? '□';
+
+  container.innerHTML = `<div class="todo-header">Tasks ${completed}/${todos.length}</div>`;
+
+  todos.forEach(t => {
+    const status = Object.prototype.hasOwnProperty.call(TODO_ICONS, t.status) ? t.status : 'pending';
+    const icon = TODO_ICONS[status] ?? '□';
     const text = t.status === 'in_progress' && t.activeForm ? t.activeForm : t.content;
-    return `<div class="todo-item">
-      <span class="todo-icon ${t.status}">${icon}</span>
-      <span class="todo-text ${t.status}">${DOMPurify.sanitize(text)}</span>
-    </div>`;
-  }).join('');
-  container.innerHTML = `<div class="todo-header">Tasks ${completed}/${todos.length}</div>${items}`;
+
+    const itemEl = document.createElement('div');
+    itemEl.className = 'todo-item';
+
+    const iconEl = document.createElement('span');
+    iconEl.classList.add('todo-icon', status);
+    iconEl.textContent = icon;
+
+    const textEl = document.createElement('span');
+    textEl.classList.add('todo-text', status);
+    textEl.textContent = text;
+
+    itemEl.appendChild(iconEl);
+    itemEl.appendChild(textEl);
+    container.appendChild(itemEl);
+  });
+
   container.style.display = 'block';
 }
 
