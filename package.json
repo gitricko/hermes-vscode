@@ -4,7 +4,7 @@
   "description": "VS Code sidebar for the Hermes AI agent. Streams chat, runs tools, manages sessions. Multi-model (Claude, Codex). Communicates over ACP.",
   "version": "3.0.1",
   "publisher": "gitricko",
-  "author": "joao/gitricko",
+  "author": "gitricko",
   "license": "MIT",
   "keywords": [
     "ai agent",
