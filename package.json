@@ -102,7 +102,8 @@
     "vscode:prepublish": "npm run build",
     "build": "webpack --mode production",
     "dev": "webpack --mode development --watch",
-    "package": "vsce package --no-dependencies"
+    "package": "vsce package --no-dependencies",
+    "vsce:publish": "vsce publish --no-dependencies"
   },
   "devDependencies": {
     "@types/dompurify": "^3.0.5",
