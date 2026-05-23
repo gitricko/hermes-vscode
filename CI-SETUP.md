@@ -33,6 +33,8 @@ Artifact name: `hermes-vscode-vsix` (download from the PR's "Artifacts" section)
   - Upload VSIX as artifact (retained 90 days)
   - **Always** create a GitHub Release with that tag and attach the VSIX
 
+Warning: Before pushing to `main`, make sure `package.json`'s `version` has been bumped if you expect a new release. The workflow derives the release tag directly from that version, so pushing again with the same version will try to reuse the existing `vX.Y.Z` tag/release. In that case, the release step will typically fail or create a noisy duplicate-release attempt rather than producing a new versioned release.
+
 Note: Automatic publishing to the VS Code Marketplace is **not** configured. If you want CI to publish to the marketplace, add a step and the `VSCE_TOKEN` secret.
 
 ---
