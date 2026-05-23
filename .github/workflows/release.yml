@@ -1,0 +1,62 @@
+# Release — Build and package to GitHub Releases
+# Triggers on push to main.
+# Produces a .vsix, creates a GitHub Release with the artifact attached.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write        # for creating GitHub Releases
+      packages: write        # for GitHub Packages (if used later)
+      attestations: write    # for artifact attestation
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build extension (webpack)
+        run: npm run build
+
+      - name: Package VSIX
+        run: npm run package
+
+      # Extract version from package.json for release tag
+      - name: Extract version
+        id: version
+        run: echo "tag=v$(jq -r '.version' package.json)" >> $GITHUB_OUTPUT
+
+      # Upload VSIX as an artifact (for archival)
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hermes-vscode-vsix
+          path: hermes-*.vsix
+          retention-days: 90
+          if-no-files-found: error
+
+      # Create GitHub Release with VSIX attached
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Hermes VS Code ${{ steps.version.outputs.tag }}
+          files: hermes-*.vsix
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
