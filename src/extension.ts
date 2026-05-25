@@ -280,7 +280,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             : 'an action';
     })();
     const whitelisted = context.workspaceState.get<string[]>(WHITELISTED_TOOLS_KEY, []);
-    
+
     if (!approvalsRequired || whitelisted.includes(toolName)) {
       const allowOptionId = optionIdByIntent(params, 'allow');
       if (allowOptionId) {
