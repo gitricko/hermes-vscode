@@ -16,10 +16,26 @@ function readApprovalMode(): boolean {
   try {
     const configPath = path.join(os.homedir(), '.hermes', 'config.yaml');
     const content = fs.readFileSync(configPath, 'utf8');
-    const match = /(?:^|\n)approvals:\s*\n(?:[ \t]+.*\n)*?[ \t]+mode:\s*([^\s#]+)/m.exec(content);
-    if (match) {
-      const mode = match[1].trim().toLowerCase();
-      return !['off', 'false', 'disabled', 'none', 'auto', 'yolo'].includes(mode);
+    const lines = content.split(/\r?\n/);
+
+    for (let i = 0; i < lines.length; i += 1) {
+      const approvalsMatch = /^(\s*)approvals:\s*$/.exec(lines[i]);
+      if (!approvalsMatch) continue;
+
+      const approvalsIndent = approvalsMatch[1].length;
+      for (let j = i + 1; j < lines.length; j += 1) {
+        const line = lines[j];
+        if (!line.trim() || line.trimStart().startsWith('#')) continue;
+
+        const lineIndent = line.match(/^\s*/)?.[0].length ?? 0;
+        if (lineIndent <= approvalsIndent) break;
+
+        const modeMatch = /^\s*mode:\s*([^\s#]+)/.exec(line);
+        if (modeMatch) {
+          const mode = modeMatch[1].trim().toLowerCase();
+          return !['off', 'false', 'disabled', 'none', 'auto', 'yolo'].includes(mode);
+        }
+      }
     }
   } catch { }
   return true; // Default to safe mode if config missing/unparseable
