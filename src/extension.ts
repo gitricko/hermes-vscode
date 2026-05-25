@@ -32,7 +32,8 @@ function readApprovalMode(): boolean {
 
         const modeMatch = /^\s*mode:\s*([^\s#]+)/.exec(line);
         if (modeMatch) {
-          const mode = modeMatch[1].trim().toLowerCase();
+          const rawMode = modeMatch[1].trim().toLowerCase();
+          const mode = rawMode.replace(/^['"]|['"]$/g, '');
           return !['off', 'false', 'disabled', 'none', 'auto', 'yolo'].includes(mode);
         }
       }
