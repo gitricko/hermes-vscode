@@ -56,6 +56,46 @@ function readHermesModel(): { model: string; source: 'env' | 'config' | 'fallbac
   return { model: DEFAULT_SONNET_MODEL, source: 'fallback' };
 }
 
+function readApprovalsDisabled(): boolean {
+  // Returns true when ~/.hermes/config.yaml has `approvals.mode: false|off|no`.
+  try {
+    const configPath = path.join(os.homedir(), '.hermes', 'config.yaml');
+    const content = fs.readFileSync(configPath, 'utf8');
+    const lines = content.split(/\r?\n/);
+
+    let inApprovals = false;
+    let approvalsIndent = 0;
+
+    for (const line of lines) {
+      if (!line.trim() || line.trimStart().startsWith('#')) continue;
+
+      const indent = line.search(/\S/);
+      const trimmed = line.trim();
+
+      if (trimmed === 'approvals:') {
+        inApprovals = true;
+        approvalsIndent = indent;
+        continue;
+      }
+
+      if (inApprovals) {
+        if (indent <= approvalsIndent) break;
+
+        const modeMatch = trimmed.match(/^mode:\s*(.+)/);
+        if (modeMatch) {
+          const rawValue = modeMatch[1].trim();
+          // Strip trailing inline comment (e.g., "false # comment" → "false")
+          const value = rawValue.split('#')[0].trim().toLowerCase();
+          return value === 'false' || value === 'off' || value === 'no';
+        }
+      }
+    }
+  } catch {
+    // Config not accessible — not disabled, show dialog.
+  }
+  return false;
+}
+
 function readHermesVersion(hermesPath: string): string {
   const attempts: string[][] = [['--version'], ['version']];
   for (const args of attempts) {
@@ -235,19 +275,52 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     setStatus('disconnected');
   });
 
+  let dangerouslyApproved = false;
+  const approvalsDisabled = readApprovalsDisabled();
+
   const permissionHandler: PermissionRequestHandler = async (_method, params) => {
     const allowOptionId = optionIdByIntent(params, 'allow');
     const denyOptionId = optionIdByIntent(params, 'deny');
-    const allow = 'Allow Once';
+
+    // Approvals disabled via config — auto-allow without dialog.
+    if (approvalsDisabled) {
+      outputChannel.appendLine('[security] approvals disabled in config, auto-allowing');
+      if (allowOptionId) {
+        return { outcome: 'selected', optionId: allowOptionId };
+      }
+      throw new Error('Permission denied: no allow option');
+    }
+
+    // Allow Always was clicked earlier — suppress future dialogs.
+    if (dangerouslyApproved) {
+      outputChannel.appendLine('[security] allow-always active, auto-allowing');
+      if (allowOptionId) {
+        return { outcome: 'selected', optionId: allowOptionId };
+      }
+      throw new Error('Permission denied: no allow option');
+    }
+
     const deny = 'Deny';
+    const allowOnce = 'Allow Once';
+    const allowAlways = 'Allow Always';
     const choice = await vscode.window.showWarningMessage(
       summarizePermissionRequest(params),
       { modal: true },
-      allow,
       deny,
+      allowOnce,
+      allowAlways,
     );
 
-    if (choice === allow && allowOptionId) {
+    if (choice === allowAlways) {
+      if (!allowOptionId) {
+        throw new Error('Permission denied: no allow option');
+      }
+      dangerouslyApproved = true;
+      outputChannel.appendLine('[security] allow-always activated — future requests auto-allowed');
+      return { outcome: 'selected', optionId: allowOptionId };
+    }
+
+    if (choice === allowOnce && allowOptionId) {
       outputChannel.appendLine('[security] permission granted once');
       return { outcome: 'selected', optionId: allowOptionId };
     }
