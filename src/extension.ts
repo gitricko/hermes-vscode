@@ -307,8 +307,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }
 
     if (choice === always && allowOptionId) {
-      outputChannel.appendLine(`[security] tool whitelisted: ${toolName}`);
-      await context.workspaceState.update(WHITELISTED_TOOLS_KEY, [...new Set([...whitelisted, toolName])]);
+      if (toolName === 'an action') {
+        outputChannel.appendLine('[security] refusing to whitelist fallback tool identifier "an action"');
+      } else {
+        outputChannel.appendLine(`[security] tool whitelisted: ${toolName}`);
+        await context.workspaceState.update(WHITELISTED_TOOLS_KEY, [...new Set([...whitelisted, toolName])]);
+      }
       return { outcome: 'selected', optionId: allowOptionId };
     }
 
