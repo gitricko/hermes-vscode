@@ -83,7 +83,9 @@ function readApprovalsDisabled(): boolean {
 
         const modeMatch = trimmed.match(/^mode:\s*(.+)/);
         if (modeMatch) {
-          const value = modeMatch[1].trim().toLowerCase();
+          const rawValue = modeMatch[1].trim();
+          // Strip trailing inline comment (e.g., "false # comment" → "false")
+          const value = rawValue.split('#')[0].trim().toLowerCase();
           return value === 'false' || value === 'off' || value === 'no';
         }
       }
