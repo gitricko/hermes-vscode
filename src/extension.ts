@@ -10,6 +10,19 @@ import { ChatPanelProvider } from './chatPanel';
 const DEFAULT_SONNET_MODEL = 'claude-sonnet-4-6';
 const APPROVED_BINARIES_KEY = 'hermes.approvedBinaries';
 
+const WHITELISTED_TOOLS_KEY = 'hermes.whitelistedTools';
+
+function readApprovalMode(): boolean {
+  try {
+    const configPath = path.join(os.homedir(), '.hermes', 'config.yaml');
+    const content = fs.readFileSync(configPath, 'utf8');
+    const match = /approvals:\s*\n\s*mode:\s*(\w+)/.exec(content);
+    if (match) {
+      return match[1].trim() === 'true';
+    }
+  } catch { }
+  return true; // Default to safe mode if config missing/unparseable
+}
 function extractModelFromHermesConfig(content: string): string | null {
   const lines = content.split(/\r?\n/);
 
@@ -236,19 +249,37 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   });
 
   const permissionHandler: PermissionRequestHandler = async (_method, params) => {
+    const toolName = summarizePermissionRequest(params);
+    const whitelisted = context.workspaceState.get<string[]>(WHITELISTED_TOOLS_KEY, []);
+    
+    if (!readApprovalMode() || whitelisted.includes(toolName)) {
+      const allowOptionId = optionIdByIntent(params, 'allow');
+      if (allowOptionId) {
+        return { outcome: 'selected', optionId: allowOptionId };
+      }
+    }
+
     const allowOptionId = optionIdByIntent(params, 'allow');
     const denyOptionId = optionIdByIntent(params, 'deny');
     const allow = 'Allow Once';
+    const always = 'Always Allow';
     const deny = 'Deny';
     const choice = await vscode.window.showWarningMessage(
       summarizePermissionRequest(params),
       { modal: true },
       allow,
+      always,
       deny,
     );
 
     if (choice === allow && allowOptionId) {
       outputChannel.appendLine('[security] permission granted once');
+      return { outcome: 'selected', optionId: allowOptionId };
+    }
+
+    if (choice === always && allowOptionId) {
+      outputChannel.appendLine(`[security] tool whitelisted: ${toolName}`);
+      await context.workspaceState.update(WHITELISTED_TOOLS_KEY, [...new Set([...whitelisted, toolName])]);
       return { outcome: 'selected', optionId: allowOptionId };
     }
 
