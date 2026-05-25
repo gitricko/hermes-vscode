@@ -312,12 +312,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     );
 
     if (choice === allowAlways) {
+      if (!allowOptionId) {
+        throw new Error('Permission denied: no allow option');
+      }
       dangerouslyApproved = true;
       outputChannel.appendLine('[security] allow-always activated — future requests auto-allowed');
-      if (allowOptionId) {
-        return { outcome: 'selected', optionId: allowOptionId };
-      }
-      throw new Error('Permission denied: no allow option');
+      return { outcome: 'selected', optionId: allowOptionId };
     }
 
     if (choice === allowOnce && allowOptionId) {
