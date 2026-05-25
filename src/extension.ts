@@ -272,16 +272,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     const toolName = (() => {
       if (!params || typeof params !== 'object') return 'an action';
       const record = params as Record<string, unknown>;
-      return typeof record.toolName === 'string'
+      const raw = typeof record.toolName === 'string'
         ? record.toolName
         : typeof record.title === 'string'
           ? record.title
           : typeof record.kind === 'string'
             ? record.kind
             : 'an action';
+      const cleaned = raw.replace(/[\r\n]+/g, ' ').trim();
+      return cleaned || 'an action';
     })();
     const whitelisted = context.workspaceState.get<string[]>(WHITELISTED_TOOLS_KEY, []);
-
     if (!approvalsRequired || whitelisted.includes(toolName)) {
       const allowOptionId = optionIdByIntent(params, 'allow');
       if (allowOptionId) {
