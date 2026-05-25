@@ -293,12 +293,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     const allow = 'Allow Once';
     const deny = 'Deny';
     const always = 'Always Allow';
+    const buttons = allowOptionId ? [deny, allow, always] : [deny];
     const choice = await vscode.window.showWarningMessage(
       summarizePermissionRequest(params),
       { modal: true },
-      deny,
-      allow,
-      always,
+      ...buttons,
     );
 
     if (choice === allow && allowOptionId) {
