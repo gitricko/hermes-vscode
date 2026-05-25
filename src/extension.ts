@@ -274,13 +274,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   });
 
   let dangerouslyApproved = false;
+  const approvalsDisabled = readApprovalsDisabled();
 
   const permissionHandler: PermissionRequestHandler = async (_method, params) => {
     const allowOptionId = optionIdByIntent(params, 'allow');
     const denyOptionId = optionIdByIntent(params, 'deny');
 
     // Approvals disabled via config — auto-allow without dialog.
-    if (readApprovalsDisabled()) {
+    if (approvalsDisabled) {
       outputChannel.appendLine('[security] approvals disabled in config, auto-allowing');
       if (allowOptionId) {
         return { outcome: 'selected', optionId: allowOptionId };
