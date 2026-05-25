@@ -16,9 +16,10 @@ function readApprovalMode(): boolean {
   try {
     const configPath = path.join(os.homedir(), '.hermes', 'config.yaml');
     const content = fs.readFileSync(configPath, 'utf8');
-    const match = /approvals:[\s\S]*?mode:\s*(\w+)/.exec(content);
+    const match = /(?:^|\n)approvals:\s*\n(?:[ \t]+.*\n)*?[ \t]+mode:\s*([^\s#]+)/m.exec(content);
     if (match) {
-      return match[1].trim() === 'true';
+      const mode = match[1].trim().toLowerCase();
+      return !['off', 'false', 'disabled', 'none', 'auto', 'yolo'].includes(mode);
     }
   } catch { }
   return true; // Default to safe mode if config missing/unparseable
