@@ -16,7 +16,7 @@ function readApprovalMode(): boolean {
   try {
     const configPath = path.join(os.homedir(), '.hermes', 'config.yaml');
     const content = fs.readFileSync(configPath, 'utf8');
-    const match = /approvals:\s*\n\s*mode:\s*(\w+)/.exec(content);
+    const match = /approvals:[\s\S]*?mode:\s*(\w+)/.exec(content);
     if (match) {
       return match[1].trim() === 'true';
     }
@@ -274,14 +274,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     const allowOptionId = optionIdByIntent(params, 'allow');
     const denyOptionId = optionIdByIntent(params, 'deny');
     const allow = 'Allow Once';
-    const always = 'Always Allow';
     const deny = 'Deny';
+    const always = 'Always Allow';
     const choice = await vscode.window.showWarningMessage(
       summarizePermissionRequest(params),
       { modal: true },
+      deny,
       allow,
       always,
-      deny,
     );
 
     if (choice === allow && allowOptionId) {
