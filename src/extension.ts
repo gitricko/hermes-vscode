@@ -303,7 +303,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       buttons.push(allow, always);
     }
     const choice = await vscode.window.showWarningMessage(
-      summarizePermissionRequest(params),
+      summarizePermissionRequest(params).replace(/[\r\n]+/g, ' '),
       { modal: true },
       ...buttons,
     );
