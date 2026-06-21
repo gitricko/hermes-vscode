@@ -89,9 +89,9 @@ export class SessionManager {
   }
 
   /** Fetch all ACP sessions from the Hermes backend. */
-  async listSessions(): Promise<{ sessionId: string; title?: string; updatedAt?: string }[]> {
-    const result = await this.client.call('list_sessions', {});
-    const response = result as { sessions?: { sessionId: string; title?: string; updatedAt?: string }[] } | undefined;
+  async listSessions(): Promise<{ sessionId: string; title?: string; updatedAt?: string; cwd?: string }[]> {
+    const result = await this.client.call('session/list', {});
+    const response = result as { sessions?: { sessionId: string; title?: string; updatedAt?: string; cwd?: string }[] } | undefined;
     return response?.sessions ?? [];
   }
 
