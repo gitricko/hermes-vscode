@@ -128,6 +128,22 @@ export class SessionStore {
     }
   }
 
+  /** Add a backend session (from ACP list_sessions) to the store without activating it. */
+  addBackendSession(acpSessionId: string, title: string, updatedAt: string | undefined, insertPos: number): void {
+    const session: ChatSession = {
+      id: `acp-${acpSessionId}`,
+      title,
+      createdAt: updatedAt ? new Date(updatedAt).getTime() : Date.now(),
+      messages: [],
+      acpSessionId,
+    };
+    this.sessions.splice(insertPos, 0, session);
+    if (this.sessions.length > MAX_SESSIONS) {
+      this.sessions = this.sessions.slice(-MAX_SESSIONS);
+    }
+    this.persist();
+  }
+
   // ── Persistence ────────────────────────────────────
 
   private persist(): void {

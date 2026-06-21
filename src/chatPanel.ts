@@ -45,6 +45,33 @@ export class ChatPanelProvider implements vscode.WebviewViewProvider {
     this.store = new SessionStore(context);
   }
 
+  /** Sync sessions from the ACP backend after connection, so the session list survives reloads. */
+  async syncSessionsFromBackend(): Promise<void> {
+    try {
+      const sessions = await this.session.listSessions();
+      if (!sessions || sessions.length === 0) return;
+      this.log(`[session] syncing ${sessions.length} backend sessions`);
+
+      // Backend returns sessions sorted by updated_at descending (most recent first).
+      // Reverse so most recent gets pushed last (appears first in reversed view).
+      let added = 0;
+      for (const bs of [...sessions].reverse()) {
+        const exists = this.store.allSessions().some(s => s.acpSessionId === bs.sessionId);
+        if (!exists) {
+          const insertPos = Math.max(0, this.store.allSessions().length - 1);
+          this.store.addBackendSession(bs.sessionId, bs.title || 'Session', bs.updatedAt, insertPos);
+          added++;
+        }
+      }
+      if (added > 0) {
+        this.log(`[session] added ${added} backend sessions to store`);
+        this.broadcastSessions(this.store);
+      }
+    } catch (err) {
+      this.log(`[session] backend sync failed: ${err}`);
+    }
+  }
+
   resolveWebviewView(webviewView: vscode.WebviewView): void {
     this.view = webviewView;
 

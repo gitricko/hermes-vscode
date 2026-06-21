@@ -432,6 +432,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       await client.start();
       outputChannel.appendLine('[acp] connected');
       setStatus('connected');
+      // Sync session list from backend so it survives browser reloads
+      void panel.syncSessionsFromBackend();
     } catch (err) {
       outputChannel.appendLine(`[acp] connect failed: ${err}`);
       setStatus('disconnected');
